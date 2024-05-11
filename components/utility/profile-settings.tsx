@@ -118,6 +118,10 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
     profile?.openrouter_api_key || ""
   )
 
+  const [privateGPTUrl, setPrivateGPTUrl] = useState(
+    profile?.private_gpt_api_url || ""
+  )
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push("/login")
@@ -146,6 +150,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
       openai_api_key: openaiAPIKey,
       openai_organization_id: openaiOrgID,
       anthropic_api_key: anthropicAPIKey,
+      private_gpt_url: privateGPTUrl,
       google_gemini_api_key: googleGeminiAPIKey,
       mistral_api_key: mistralAPIKey,
       groq_api_key: groqAPIKey,
@@ -172,7 +177,8 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
       "mistral",
       "groq",
       "perplexity",
-      "openrouter"
+      "openrouter",
+      "private_gpt_api"
     ]
 
     providers.forEach(async provider => {
@@ -433,6 +439,16 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
             </TabsContent>
 
             <TabsContent className="mt-4 space-y-4" value="keys">
+              <div className="space-y-1">
+                <Label>PrivateGPT API URL</Label>
+
+                <Input
+                  placeholder="PrivateGPT API URL"
+                  type="text"
+                  value={privateGPTUrl}
+                  onChange={e => setPrivateGPTUrl(e.target.value)}
+                />
+              </div>
               <div className="mt-5 space-y-2">
                 <Label className="flex items-center">
                   {useAzureOpenai

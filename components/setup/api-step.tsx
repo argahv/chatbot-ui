@@ -71,6 +71,16 @@ export const APIStep: FC<APIStepProps> = ({
   return (
     <>
       <div className="mt-5 space-y-2">
+        <div className="space-y-1">
+          <Label>PrivateGPT API URL</Label>
+
+          <Input
+            placeholder="PrivateGPT API URL"
+            type="text"
+            value={anthropicAPIKey}
+            onChange={e => onAnthropicAPIKeyChange(e.target.value)}
+          />
+        </div>
         <Label className="flex items-center">
           <div>
             {useAzureOpenai ? "Azure OpenAI API Key" : "OpenAI API Key"}

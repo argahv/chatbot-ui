@@ -5,7 +5,14 @@ import { LLM_LIST_MAP } from "./llm/llm-list"
 
 export const fetchHostedModels = async (profile: Tables<"profiles">) => {
   try {
-    const providers = ["google", "anthropic", "mistral", "groq", "perplexity"]
+    const providers = [
+      "google",
+      "anthropic",
+      "mistral",
+      "groq",
+      "perplexity",
+      "private_gpt_api"
+    ]
 
     if (profile.use_azure_openai) {
       providers.push("azure")
@@ -33,6 +40,7 @@ export const fetchHostedModels = async (profile: Tables<"profiles">) => {
       } else {
         providerKey = `${provider}_api_key` as keyof typeof profile
       }
+      console.log("providers", providers)
 
       if (profile?.[providerKey] || data.isUsingEnvKeyMap[provider]) {
         const models = LLM_LIST_MAP[provider]
@@ -63,6 +71,8 @@ export const fetchOllamaModels = async () => {
     }
 
     const data = await response.json()
+
+    console.log("data", data)
 
     const localModels: LLM[] = data.models.map((model: any) => ({
       modelId: model.name as LLMID,

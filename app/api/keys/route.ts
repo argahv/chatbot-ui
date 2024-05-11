@@ -13,7 +13,7 @@ export async function GET() {
     groq: VALID_ENV_KEYS.GROQ_API_KEY,
     perplexity: VALID_ENV_KEYS.PERPLEXITY_API_KEY,
     openrouter: VALID_ENV_KEYS.OPENROUTER_API_KEY,
-
+    private_gpt_api_url: VALID_ENV_KEYS.PRIVATE_GPT_API_URL,
     openai_organization_id: VALID_ENV_KEYS.OPENAI_ORGANIZATION_ID,
 
     azure_openai_endpoint: VALID_ENV_KEYS.AZURE_OPENAI_ENDPOINT,

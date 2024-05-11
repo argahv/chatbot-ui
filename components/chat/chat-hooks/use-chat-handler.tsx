@@ -212,7 +212,9 @@ export const useChatHandler = () => {
           provider: "custom" as ModelProvider,
           hostedId: model.id,
           platformLink: "",
-          imageInput: false
+          imageInput: false,
+          base_url: model.base_url,
+          is_private_gpt: model.is_private_gpt || false
         })),
         ...LLM_LIST,
         ...availableLocalModels,

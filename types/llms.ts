@@ -63,6 +63,8 @@ export interface LLM {
   hostedId: string
   platformLink: string
   imageInput: boolean
+  is_private_gpt: boolean
+  base_url: string
   pricing?: {
     currency: string
     unit: string

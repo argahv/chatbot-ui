@@ -28,14 +28,39 @@ export async function POST(request: Request) {
       .eq("id", customModelId)
       .single()
 
+    console.log("first", customModel)
     if (!customModel) {
       throw new Error(error.message)
     }
 
-    const custom = new OpenAI({
-      apiKey: customModel.api_key || "",
-      baseURL: customModel.base_url
-    })
+    const custom =
+      customModel.model_id === "gpt-private"
+        ? {
+            chat: {
+              completions: {
+                create: async (params: any) => {
+                  return {
+                    id: "fake-id",
+                    object: "text",
+                    created: 1234567890,
+                    model: "gpt-3.5-turbo",
+                    choices: [
+                      {
+                        finish_reason: "stop",
+                        index: 0,
+                        logprobs: null,
+                        text: "Hello, how can I help you today?"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        : new OpenAI({
+            apiKey: customModel.api_key || "",
+            baseURL: customModel.base_url
+          })
 
     const response = await custom.chat.completions.create({
       model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
@@ -43,10 +68,11 @@ export async function POST(request: Request) {
       temperature: chatSettings.temperature,
       stream: true
     })
+    console.log("response", response)
 
-    const stream = OpenAIStream(response)
+    // const stream = OpenAIStream(response)
 
-    return new StreamingTextResponse(stream)
+    // return new StreamingTextResponse(stream)
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500

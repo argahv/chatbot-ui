@@ -64,6 +64,7 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     ...availableOpenRouterModels
   ]
 
+  console.log("allModel", allModels)
   const groupedModels = allModels.reduce<Record<string, LLM[]>>(
     (groups, model) => {
       const key = model.provider
@@ -75,6 +76,8 @@ export const ModelSelect: FC<ModelSelectProps> = ({
     },
     {}
   )
+
+  console.log("groupModels", groupedModels)
 
   const selectedModel = allModels.find(
     model => model.modelId === selectedModelId

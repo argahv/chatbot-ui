@@ -129,7 +129,7 @@ export default function SetupPage() {
       openai_organization_id: openaiOrgID,
       anthropic_api_key: anthropicAPIKey,
       google_gemini_api_key: googleGeminiAPIKey,
-      private_gpt_url: private_gpt_url,
+      private_gpt_api_url: private_gpt_api_url,
       mistral_api_key: mistralAPIKey,
       groq_api_key: groqAPIKey,
       perplexity_api_key: perplexityAPIKey,

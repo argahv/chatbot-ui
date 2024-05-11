@@ -1,4 +1,5 @@
 import { SidebarCreateItem } from "@/components/sidebar/items/all/sidebar-create-item"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ChatbotUIContext } from "@/context/context"
@@ -22,6 +23,7 @@ export const CreateModel: FC<CreateModelProps> = ({ isOpen, onOpenChange }) => {
   const [modelId, setModelId] = useState("")
   const [name, setName] = useState("")
   const [contextLength, setContextLength] = useState(4096)
+  const [isisPrivateGPT, setIsisPrivateGPT] = useState(false)
 
   if (!profile || !selectedWorkspace) return null
 
@@ -39,7 +41,8 @@ export const CreateModel: FC<CreateModelProps> = ({ isOpen, onOpenChange }) => {
           description,
           context_length: contextLength,
           model_id: modelId,
-          name
+          name,
+          is_private_gpt: isisPrivateGPT
         } as TablesInsert<"models">
       }
       renderInputs={() => (
@@ -73,6 +76,16 @@ export const CreateModel: FC<CreateModelProps> = ({ isOpen, onOpenChange }) => {
               onChange={e => setModelId(e.target.value)}
             />
           </div>
+          <div className="space-y-1">
+            <Label>
+              Is Self Hosted?
+              <input
+                type="checkbox"
+                value={isisPrivateGPT ? "true" : "false"}
+                onChange={e => setIsisPrivateGPT(e.target.checked)}
+              />
+            </Label>
+          </div>
 
           <div className="space-y-1">
             <Label>Base URL</Label>
@@ -83,22 +96,25 @@ export const CreateModel: FC<CreateModelProps> = ({ isOpen, onOpenChange }) => {
               onChange={e => setBaseUrl(e.target.value)}
             />
 
-            <div className="pt-1 text-xs italic">
-              Your API must be compatible with the OpenAI SDK.
+            {!isisPrivateGPT && (
+              <div className="pt-1 text-xs italic">
+                Your API must be compatible with the OpenAI SDK.
+              </div>
+            )}
+          </div>
+
+          {!isisPrivateGPT && (
+            <div className="space-y-1">
+              <Label>API Key</Label>
+
+              <Input
+                type="password"
+                placeholder="API Key..."
+                value={apiKey}
+                onChange={e => setApiKey(e.target.value)}
+              />
             </div>
-          </div>
-
-          <div className="space-y-1">
-            <Label>API Key</Label>
-
-            <Input
-              type="password"
-              placeholder="API Key..."
-              value={apiKey}
-              onChange={e => setApiKey(e.target.value)}
-            />
-          </div>
-
+          )}
           <div className="space-y-1">
             <Label>Max Context Length</Label>
 

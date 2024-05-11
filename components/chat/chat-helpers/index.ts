@@ -22,6 +22,7 @@ import {
 import React from "react"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
+import { Client as GradioClient } from "@gradio/client"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -218,6 +219,8 @@ export const handleHostedChat = async (
     formattedMessages = await buildFinalMessages(payload, profile, chatImages)
   }
 
+  console.log("modelData", modelData)
+  console.log("provider", provider)
   const apiEndpoint =
     provider === "custom" ? "/api/chat/custom" : `/api/chat/${provider}`
 
@@ -227,14 +230,25 @@ export const handleHostedChat = async (
     customModelId: provider === "custom" ? modelData.hostedId : ""
   }
 
-  const response = await fetchChatResponse(
-    apiEndpoint,
-    requestBody,
-    true,
-    newAbortController,
-    setIsGenerating,
-    setChatMessages
-  )
+  const response = modelData.is_private_gpt
+    ? await predictPrivateGPT(
+        modelData.base_url,
+        formattedMessages.map(message => message).join("\n"),
+        {
+          injectedFiles: newMessageImages.map(image => image.path),
+          mode: "chat",
+
+          systemPrompt: payload.chatSettings.prompt
+        }
+      )
+    : await fetchChatResponse(
+        apiEndpoint,
+        requestBody,
+        true,
+        newAbortController,
+        setIsGenerating,
+        setChatMessages
+      )
 
   return await processResponse(
     response,
@@ -247,6 +261,24 @@ export const handleHostedChat = async (
     setChatMessages,
     setToolInUse
   )
+}
+
+export const predictPrivateGPT = async (
+  url: string,
+  message: string,
+  stream: boolean,
+  systemPrompt: string
+) => {
+  const res = await fetch(`${url}/predict`, {
+    method: "POST",
+    body: JSON.stringify({
+      prompt: message,
+      stream,
+      system_prompt: systemPrompt
+    })
+  })
+  console.log(res)
+  return res
 }
 
 export const fetchChatResponse = async (

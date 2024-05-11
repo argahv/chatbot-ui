@@ -935,6 +935,7 @@ export type Database = {
           description: string
           folder_id: string | null
           id: string
+          is_private_gpt: boolean | null
           model_id: string
           name: string
           sharing: string
@@ -949,6 +950,7 @@ export type Database = {
           description: string
           folder_id?: string | null
           id?: string
+          is_private_gpt?: boolean | null
           model_id: string
           name: string
           sharing?: string
@@ -963,6 +965,7 @@ export type Database = {
           description?: string
           folder_id?: string | null
           id?: string
+          is_private_gpt?: boolean | null
           model_id?: string
           name?: string
           sharing?: string

@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS models (
     description TEXT NOT NULL CHECK (char_length(description) <= 500),
     model_id TEXT NOT NULL CHECK (char_length(model_id) <= 1000),
     name TEXT NOT NULL CHECK (char_length(name) <= 100)
+    is_private_gpt BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 -- INDEXES --

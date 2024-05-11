@@ -135,6 +135,10 @@ BEGIN
   INSERT INTO tools (user_id, description, name, schema, url, created_at, updated_at, sharing) VALUES
   ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', 'This is a description for Tool 1', 'Tool 1', '{}', 'http://example.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'private');
 
+  --Create a custom model by default for the user
+  INSERT INTO models (user_id, api_key, base_url, description, model_id, name, is_private_gpt) VALUES
+  ('e9fc7e46-a8a5-4fd4-8ba7-af485013e6fa', 'api_key', 'base_url', 'TThis is a model hosted by user', 'model_id', 'PrivateGPT', true);
+
   -- Start data for tool_workspaces
   DECLARE
     tool1_id UUID;

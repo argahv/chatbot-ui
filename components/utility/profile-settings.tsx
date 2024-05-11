@@ -150,7 +150,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
       openai_api_key: openaiAPIKey,
       openai_organization_id: openaiOrgID,
       anthropic_api_key: anthropicAPIKey,
-      private_gpt_url: privateGPTUrl,
+      private_gpt_api_url: privateGPTUrl,
       google_gemini_api_key: googleGeminiAPIKey,
       mistral_api_key: mistralAPIKey,
       groq_api_key: groqAPIKey,
@@ -178,7 +178,7 @@ export const ProfileSettings: FC<ProfileSettingsProps> = ({}) => {
       "groq",
       "perplexity",
       "openrouter",
-      "private_gpt_api"
+      "private_gpt_api_url"
     ]
 
     providers.forEach(async provider => {

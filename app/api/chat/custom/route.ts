@@ -5,6 +5,7 @@ import { OpenAIStream, StreamingTextResponse } from "ai"
 import { ServerRuntime } from "next"
 import OpenAI from "openai"
 import { ChatCompletionCreateParamsBase } from "openai/resources/chat/completions.mjs"
+import { PrivategptApiClient, streamToReadableStream } from "privategpt-sdk-web"
 
 export const runtime: ServerRuntime = "edge"
 
@@ -28,39 +29,39 @@ export async function POST(request: Request) {
       .eq("id", customModelId)
       .single()
 
-    console.log("first", customModel)
     if (!customModel) {
       throw new Error(error.message)
     }
 
-    const custom =
-      customModel.model_id === "gpt-private"
-        ? {
-            chat: {
-              completions: {
-                create: async (params: any) => {
-                  return {
-                    id: "fake-id",
-                    object: "text",
-                    created: 1234567890,
-                    model: "gpt-3.5-turbo",
-                    choices: [
-                      {
-                        finish_reason: "stop",
-                        index: 0,
-                        logprobs: null,
-                        text: "Hello, how can I help you today?"
-                      }
-                    ]
-                  }
-                }
-              }
-            }
-          }
-        : new OpenAI({
-            apiKey: customModel.api_key || "",
-            baseURL: customModel.base_url
-          })
+    const custom = new OpenAI({
+      apiKey: customModel.api_key || "",
+      baseURL: customModel.base_url
+    })
+    // customModel.is_private_gpt
+    // ? {
+    //     chat: {
+    //       completions: {
+    //         create: async (params: any) => {
+    //           console.log("customParams", params)
+    //           const pgptApiClient = new PrivategptApiClient({
+    //             environment: customModel.base_url
+    //           })
+    //           const res =
+    //             await pgptApiClient.contextualCompletions.chatCompletionStream(
+    //               {
+    //                 messages: params.messages,
+    //                 includeSources: true,
+    //                 useContext: true
+    //               }
+    //             )
+    //           return res
+
+    //           // return readableStream
+    //         }
+    //       }
+    //     }
+    //   }
+    // :
 
     const response = await custom.chat.completions.create({
       model: chatSettings.model as ChatCompletionCreateParamsBase["model"],
@@ -70,9 +71,13 @@ export async function POST(request: Request) {
     })
     console.log("response", response)
 
-    // const stream = OpenAIStream(response)
+    const stream = OpenAIStream(response)
+    // customModel?.is_private_gpt
+    //   ? streamToReadableStream(response)
+    //   :
+    // console.log("stream", stream)
 
-    // return new StreamingTextResponse(stream)
+    return new StreamingTextResponse(stream)
   } catch (error: any) {
     let errorMessage = error.message || "An unexpected error occurred"
     const errorCode = error.status || 500

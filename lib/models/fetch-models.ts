@@ -111,7 +111,9 @@ export const fetchOpenRouterModels = async () => {
         hostedId: model.name,
         platformLink: "https://openrouter.dev",
         imageInput: false,
-        maxContext: model.context_length
+        maxContext: model.context_length,
+        is_private_gpt: false,
+        base_url: "https://openrouter.dev"
       })
     )
 

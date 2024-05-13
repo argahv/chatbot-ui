@@ -22,7 +22,8 @@ import {
 import React from "react"
 import { toast } from "sonner"
 import { v4 as uuidv4 } from "uuid"
-import { Client as GradioClient } from "@gradio/client"
+import { PrivategptApiClient, streamToReadableStream } from "privategpt-sdk-web"
+import { createChunkDecoder } from "ai"
 
 export const validateChatSettings = (
   chatSettings: ChatSettings | null,
@@ -219,8 +220,6 @@ export const handleHostedChat = async (
     formattedMessages = await buildFinalMessages(payload, profile, chatImages)
   }
 
-  console.log("modelData", modelData)
-  console.log("provider", provider)
   const apiEndpoint =
     provider === "custom" ? "/api/chat/custom" : `/api/chat/${provider}`
 
@@ -230,21 +229,34 @@ export const handleHostedChat = async (
     customModelId: provider === "custom" ? modelData.hostedId : ""
   }
 
-  const response = modelData.is_private_gpt
-    ? await predictPrivateGPT(
-        modelData.base_url,
-        formattedMessages.map(message => message).join("\n"),
-        true,
-        payload.chatSettings.prompt
-      )
-    : await fetchChatResponse(
-        apiEndpoint,
-        requestBody,
-        true,
-        newAbortController,
-        setIsGenerating,
-        setChatMessages
-      )
+  if (modelData.is_private_gpt) {
+    const pgptApiClient = new PrivategptApiClient({
+      environment: modelData.base_url
+    })
+    console.log("formattedMessages", formattedMessages)
+
+    const stream =
+      await pgptApiClient.contextualCompletions.chatCompletionStream({
+        messages: formattedMessages as any,
+        includeSources: true,
+        useContext: true
+      })
+
+    await processPrivateGPTStream(
+      streamToReadableStream(stream),
+      setChatMessages
+    )
+    return
+  }
+
+  const response = await fetchChatResponse(
+    apiEndpoint,
+    requestBody,
+    true,
+    newAbortController,
+    setIsGenerating,
+    setChatMessages
+  )
 
   return await processResponse(
     response,
@@ -259,22 +271,70 @@ export const handleHostedChat = async (
   )
 }
 
-export const predictPrivateGPT = async (
-  url: string,
-  message: string,
-  stream: boolean,
-  systemPrompt: string
+const processPrivateGPTStream = async (
+  stream: ReadableStream,
+  setChatMessages: React.Dispatch<React.SetStateAction<ChatMessage[]>>
 ) => {
-  const res = await fetch(`${url}/predict`, {
-    method: "POST",
-    body: JSON.stringify({
-      prompt: message,
-      stream,
-      system_prompt: systemPrompt
+  const reader = stream.getReader()
+  const decoder = createChunkDecoder()
+  const loopRunner = true
+  let result = ""
+
+  function extractMessage(response: any) {
+    // Split the response into chunks
+    const chunks = response.split("}{").map(chunk => "{" + chunk + "}")
+
+    let message = ""
+
+    // Process each chunk
+    chunks.forEach(chunk => {
+      // Parse the chunk as JSON
+      let json
+      try {
+        json = JSON.parse(chunk)
+      } catch (error) {
+        // Ignore parsing errors
+        return
+      }
+
+      // Extract the message content
+      if (json.choices && json.choices[0] && json.choices[0].delta) {
+        message += json.choices[0].delta.content
+      }
     })
-  })
-  console.log(res)
-  return res
+
+    return message
+  }
+
+  const onNewMessage = (openAiCompletion: any) => {
+    const message = extractMessage(openAiCompletion)
+
+    setChatMessages(prevMessages => {
+      const lastMessage = prevMessages[prevMessages.length - 1]
+      const updatedMessage: ChatMessage = {
+        message: {
+          ...lastMessage.message,
+          content: message
+        },
+        fileItems: lastMessage.fileItems
+      }
+      console.log("updatedMessage", updatedMessage)
+
+      return [...prevMessages.slice(0, -1), updatedMessage]
+    })
+  }
+
+  while (loopRunner) {
+    const { value, done } = await reader.read()
+    if (done) {
+      break
+    }
+    const decodedChunk = decoder(value)
+    if (!decodedChunk) continue
+    result += decoder(value)
+    onNewMessage?.(result)
+  }
+  return result
 }
 
 export const fetchChatResponse = async (

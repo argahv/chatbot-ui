@@ -234,12 +234,8 @@ export const handleHostedChat = async (
     ? await predictPrivateGPT(
         modelData.base_url,
         formattedMessages.map(message => message).join("\n"),
-        {
-          injectedFiles: newMessageImages.map(image => image.path),
-          mode: "chat",
-
-          systemPrompt: payload.chatSettings.prompt
-        }
+        true,
+        payload.chatSettings.prompt
       )
     : await fetchChatResponse(
         apiEndpoint,

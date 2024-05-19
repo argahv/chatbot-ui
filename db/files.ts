@@ -3,6 +3,7 @@ import { TablesInsert, TablesUpdate } from "@/supabase/types"
 import mammoth from "mammoth"
 import { toast } from "sonner"
 import { uploadFile } from "./storage/files"
+import { PrivategptApiClient } from "privategpt-sdk-web"
 
 export const getFileById = async (fileId: string) => {
   const { data: file, error } = await supabase
@@ -106,6 +107,8 @@ export const createFile = async (
     .select("*")
     .single()
 
+  console.log("createdFile", createdFile)
+
   if (error) {
     throw new Error(error.message)
   }
@@ -115,6 +118,14 @@ export const createFile = async (
     file_id: createdFile.id,
     workspace_id
   })
+
+  // todo: use one instance in all app
+  const instance = new PrivategptApiClient({
+    environment: "http://localhost:8001"
+  })
+  const injested = await instance.ingestion.ingestFile(file)
+
+  console.log("injested", injested)
 
   const filePath = await uploadFile(file, {
     name: createdFile.name,
@@ -148,6 +159,8 @@ export const createFile = async (
   }
 
   const fetchedFile = await getFileById(createdFile.id)
+
+  console.log("fetchedFile", fetchedFile)
 
   return fetchedFile
 }
@@ -292,6 +305,13 @@ export const updateFile = async (
 export const deleteFile = async (fileId: string) => {
   const { error } = await supabase.from("files").delete().eq("id", fileId)
 
+  // todo: use one instance in all app
+  const pgptInstance = new PrivategptApiClient({
+    environment: "http://localhost:8001"
+  })
+
+  await pgptInstance.ingestion.deleteIngested(fileId)
+
   if (error) {
     throw new Error(error.message)
   }
@@ -308,6 +328,13 @@ export const deleteFileWorkspace = async (
     .delete()
     .eq("file_id", fileId)
     .eq("workspace_id", workspaceId)
+
+  // todo: use one instance in all app
+  const pgptInstance = new PrivategptApiClient({
+    environment: "http://localhost:8001"
+  })
+
+  await pgptInstance.ingestion.deleteIngested(fileId)
 
   if (error) throw new Error(error.message)
 

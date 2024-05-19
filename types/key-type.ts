@@ -6,4 +6,3 @@ export type EnvKey =
   | "GROQ_API_KEY"
   | "PERPLEXITY_API_KEY"
   | "AZURE_OPENAI_API_KEY"
-  | "PRIVATE_GPT_API_URL"

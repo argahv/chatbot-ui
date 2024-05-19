@@ -32,6 +32,8 @@ export const useSelectFileHandler = () => {
     handleFilesToAccept()
   }, [chatSettings?.model])
 
+  console.log("chatSettings", chatSettings)
+
   const handleFilesToAccept = () => {
     const model = chatSettings?.model
     const FULL_MODEL = LLM_LIST.find(llm => llm.modelId === model)

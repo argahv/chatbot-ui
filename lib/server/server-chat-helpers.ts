@@ -41,7 +41,6 @@ function addApiKeysToProfile(profile: Tables<"profiles">) {
   const apiKeys = {
     [VALID_ENV_KEYS.OPENAI_API_KEY]: "openai_api_key",
     [VALID_ENV_KEYS.ANTHROPIC_API_KEY]: "anthropic_api_key",
-    [VALID_ENV_KEYS.PRIVATE_GPT_API_URL]: "private_gpt_api_url",
     [VALID_ENV_KEYS.GOOGLE_GEMINI_API_KEY]: "google_gemini_api_key",
     [VALID_ENV_KEYS.MISTRAL_API_KEY]: "mistral_api_key",
     [VALID_ENV_KEYS.GROQ_API_KEY]: "groq_api_key",
